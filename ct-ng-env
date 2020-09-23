@@ -1,0 +1,59 @@
+#!/bin/bash
+
+
+build() {
+    local version=${1}
+    local build_dir=$(mktemp -d)
+    local install_dir=$(readlink -f ${2})
+    
+    if [ -d "${install_dir}" ]; then
+        exit 0
+    fi
+
+    pushd "${build_dir}"
+    git clone https://github.com/crosstool-ng/crosstool-ng.git "${version}"
+    pushd "${version}"
+    git checkout "${version}"
+    if [ $? -eq 0 ]; then
+        ./bootstrap
+        ./configure --prefix="${install_dir}"
+        make -j $(nproc)
+        if [ $? -eq 0 ]; then
+            make install
+        fi
+    else
+        echo "Error: Given version or branch not found"
+    fi
+
+    popd
+    popd
+
+    cat << EOF > ${install_dir}/activate
+#!/bin/bash
+        
+export OLD_CT_NG_PATH="\${PATH}"
+export OLD_CT_NG_PS1="\${PS1}"
+export PATH="${install_dir}/bin:\${PATH}"
+export PS1="(ct-ng-${version}) \${PS1}"
+
+deactivate() {
+    export PATH="\${OLD_CT_NG_PATH}"
+    export PS1="\${OLD_CT_NG_PS1}"
+}
+EOF
+}
+
+help() {
+    echo "ct-ng-env <version> <path>"
+}
+
+
+case "$1" in
+    help)
+        help
+    ;;
+    *)
+        build ${1:-"master"} ${2:-"$PWD/ct-ng-default"}
+    ;;
+esac
+
