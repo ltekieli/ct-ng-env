@@ -2,6 +2,27 @@
 
 Small tool for managing crosstool-ng installations, similiar to python's virtual environment.
 
+## Prerequisites
+```
+apt install \
+    autoconf \
+    build-essential \
+    bzip2 \
+    curl \
+    flex \
+    gawk \
+    git \
+    help2man \
+    libncurses-dev \
+    libtool-bin \
+    make \
+    texinfo \
+    unzip \
+    wget \
+    yacc \
+    xz-utils
+```
+
 ## Installation
 Clone the repository and link the ```ct-ng-env``` script to one of your PATH's binary directories
 
